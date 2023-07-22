@@ -36,7 +36,7 @@ public class MyLocationService extends Service {
     public void onCreate() {
         super.onCreate();
         isServiceStarted = true;
-        String NOTIFICATION_CHANNEL_ID = "my_notification_location";
+        String NOTIFICATION_CHANNEL_ID = "Location App";
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setOngoing(false)
                 .setSmallIcon(R.mipmap.ic_launcher);

@@ -160,47 +160,49 @@ const App = () => {
           requestPermissions()
         }
 
-        getOneTimeLocation()
-        subscribeLocationLocation()
-        console.log('Check Location', currentLatitude, currentLongitude)
-        if (
-          currentLatitude != lastLatitude ||
-          currentLongitude != lastLongitude
-        ) {
-          //todo need to Add check to save location only if location changed
-          console.log('Location Changed')
-          lastLatitude = currentLatitude
-          lastLongitude = currentLongitude
-          // use realm to interact with database
-          const realm = await Realm.open({
-            path: 'myrealm',
-            schema: [TaskSchema],
-          })
+        //Uncomment if you need location change in reactnative
 
-          // write records to database
-          realm.write(() => {
-            const task = realm.create('MapData', {
-              lat: currentLatitude.toString(),
-              long: currentLongitude.toString(),
-              alt: altitude.toString(),
-              direct: direction.toString(),
-              spd: speed.toString(),
-              timestamp: timeStamp.toString(),
-              _id: Date.now(),
-            })
-            console.log(
-              `created tasks Latitude: ${task.lat} Longitude: ${task.long}`,
-            )
-          })
+        // getOneTimeLocation()
+        // subscribeLocationLocation()
+        // console.log('Check Location', currentLatitude, currentLongitude)
+        // if (
+        //   currentLatitude != lastLatitude ||
+        //   currentLongitude != lastLongitude
+        // ) {
+        //   //todo need to Add check to save location only if location changed
+        //   console.log('Location Changed')
+        //   lastLatitude = currentLatitude
+        //   lastLongitude = currentLongitude
+        //   // use realm to interact with database
+        //   const realm = await Realm.open({
+        //     path: 'myrealm',
+        //     schema: [TaskSchema],
+        //   })
 
-          // ### read records from database
-          const tasks = realm.objects('MapData')
-          console.log(
-            `The lists of tasks are: ${tasks.map(task => {
-              return task.lat + ' ' + task.long + '\n\r'
-            })}`,
-          )
-        }
+        //   // write records to database
+        //   realm.write(() => {
+        //     const task = realm.create('MapData', {
+        //       lat: currentLatitude.toString(),
+        //       long: currentLongitude.toString(),
+        //       alt: altitude.toString(),
+        //       direct: direction.toString(),
+        //       spd: speed.toString(),
+        //       timestamp: timeStamp.toString(),
+        //       _id: Date.now(),
+        //     })
+        //     console.log(
+        //       `created tasks Latitude: ${task.lat} Longitude: ${task.long}`,
+        //     )
+        //   })
+
+        //   // ### read records from database
+        //   const tasks = realm.objects('MapData')
+        //   console.log(
+        //     `The lists of tasks are: ${tasks.map(task => {
+        //       return task.lat + ' ' + task.long + '\n\r'
+        //     })}`,
+        //   )
+        // }
 
         // ### read 1 record from database
         // const myTask = realm.objectForPrimaryKey("Task", 1637096347792); // search for a realm object with a primary key that is an int.

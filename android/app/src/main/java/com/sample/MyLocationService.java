@@ -92,6 +92,10 @@ public class MyLocationService extends Service {
                     WritableMap map = Arguments.createMap();
                     map.putString("latitude", String.valueOf(mLocation.getLatitude()));
                     map.putString("longitude", String.valueOf(mLocation.getLongitude()));
+                    map.putString("altitude", String.valueOf(mLocation.getAltitude()));
+                    map.putString("accuracy", String.valueOf(mLocation.getAccuracy()));
+                    map.putString("speed", String.valueOf(mLocation.getSpeed()));
+
                     map.putString("city",city);
                     map.putString("state",state);
                     map.putString("country",country);

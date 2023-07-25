@@ -91,10 +91,21 @@ const App = () => {
   const startService = () => {
     Platform.OS === 'android' && LocationServiceModule.startLocationService()
 
-    DeviceEventEmitter.addListener('location', function (e: Event) {
-      console.log('DeviceEventEmitter Location Listener', e)
-      // handle event and you will get a value in event object, you can log it here
-    })
+    if (Platform.OS === 'android') {
+      DeviceEventEmitter.addListener('location', function (e: Event) {
+        console.log('DeviceEventEmitter Location Listener', e)
+        // console.log('latitude', e.latitude)
+        // console.log('longitude', e.longitude)
+        // console.log('altitude', e.altitude)
+        // console.log('accuracy', e.accuracy)
+        // console.log('speed', e.speed)
+
+        // console.log('Address', e.address)
+        // console.log('City', e.city)
+        // console.log('State', e.state)
+        // console.log('Country', e.country)
+      })
+    }
 
     //   Platform.OS === 'android'
     //     ? LocationServiceModule.startLocationService()

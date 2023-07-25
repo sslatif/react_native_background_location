@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   PermissionsAndroid,
+  DeviceEventEmitter,
   Button,
 } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
@@ -89,6 +90,11 @@ const App = () => {
 
   const startService = () => {
     Platform.OS === 'android' && LocationServiceModule.startLocationService()
+
+    DeviceEventEmitter.addListener('location', function (e: Event) {
+      console.log('DeviceEventEmitter Location Listener', e)
+      // handle event and you will get a value in event object, you can log it here
+    })
 
     //   Platform.OS === 'android'
     //     ? LocationServiceModule.startLocationService()

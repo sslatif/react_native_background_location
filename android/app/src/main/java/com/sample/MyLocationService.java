@@ -1,5 +1,7 @@
 package com.sample;
 
+import static com.sample.LocationServiceModule.reactContext;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -10,10 +12,14 @@ import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.sample.locations.ApiClient;
 import com.sample.locations.AppExecutors;
 import com.sample.locations.LocationHelper;
@@ -27,6 +33,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MyLocationService extends Service {
+
     static Location mLocation;
     static boolean isServiceStarted = false;
 
@@ -81,6 +88,15 @@ public class MyLocationService extends Service {
                     String postalCode = addresses.get(0).getPostalCode();
                     String knownName = addresses.get(0).getFeatureName();
                     Log.d("Address", "Address:" + address + ", City:" + city + ",State:" + state + ",Country:" + country);
+
+                    WritableMap map = Arguments.createMap();
+                    map.putString("latitude", String.valueOf(mLocation.getLatitude()));
+                    map.putString("longitude", String.valueOf(mLocation.getLongitude()));
+                    map.putString("city",city);
+                    map.putString("state",state);
+                    map.putString("country",country);
+                    map.putString("address",address);
+                    sendEvent(reactContext, map);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -104,6 +120,15 @@ public class MyLocationService extends Service {
             }
         });
         return START_STICKY;
+    }
+
+    private void sendEvent(ReactContext reactContext, @Nullable WritableMap params) {
+        try {
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("location", params);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -11,8 +11,6 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		4676082F2A615494008D34CA /* VoiceChangerModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4676082E2A615494008D34CA /* VoiceChangerModule.swift */; };
-		467608312A615BC4008D34CA /* VoiceChangerModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 467608302A615BC4008D34CA /* VoiceChangerModule.m */; };
 		468A07F62A6925D200387006 /* MyLocationDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 468A07F52A6925D200387006 /* MyLocationDataManager.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		B2B758910BD0DDE266E96754 /* libPods-sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A2F93D0AE929131C93B324B /* libPods-sample.a */; };
@@ -41,8 +39,6 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = sample/main.m; sourceTree = "<group>"; };
 		3057E778450D3CFC08C5F228 /* Pods-sample-sampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-sample-sampleTests.release.xcconfig"; path = "Target Support Files/Pods-sample-sampleTests/Pods-sample-sampleTests.release.xcconfig"; sourceTree = "<group>"; };
 		4676082D2A615494008D34CA /* sample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "sample-Bridging-Header.h"; sourceTree = "<group>"; };
-		4676082E2A615494008D34CA /* VoiceChangerModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceChangerModule.swift; sourceTree = "<group>"; };
-		467608302A615BC4008D34CA /* VoiceChangerModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VoiceChangerModule.m; sourceTree = "<group>"; };
 		468A07F52A6925D200387006 /* MyLocationDataManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MyLocationDataManager.m; path = sample/MyLocationDataManager.m; sourceTree = "<group>"; };
 		660ED697A7B1A4CB95F956E6 /* Pods-sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-sample.debug.xcconfig"; path = "Target Support Files/Pods-sample/Pods-sample.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = sample/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -99,10 +95,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				4676082E2A615494008D34CA /* VoiceChangerModule.swift */,
 				4676082D2A615494008D34CA /* sample-Bridging-Header.h */,
 				468A07F52A6925D200387006 /* MyLocationDataManager.m */,
-				467608302A615BC4008D34CA /* VoiceChangerModule.m */,
 			);
 			name = sample;
 			sourceTree = "<group>";
@@ -426,8 +420,6 @@
 				468A07F62A6925D200387006 /* MyLocationDataManager.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				4676082F2A615494008D34CA /* VoiceChangerModule.swift in Sources */,
-				467608312A615BC4008D34CA /* VoiceChangerModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -446,7 +438,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E648297CE139B0F578982927 /* Pods-sample-sampleTests.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -474,7 +465,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3057E778450D3CFC08C5F228 /* Pods-sample-sampleTests.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = sampleTests/Info.plist;

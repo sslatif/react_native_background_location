@@ -15,9 +15,10 @@ import MapView, { Marker } from 'react-native-maps'
 import { PROVIDER_GOOGLE } from 'react-native-maps' // remove PROVIDER_GOOGLE import if not using Google Maps
 import Realm from 'realm'
 import Geolocation from '@react-native-community/geolocation'
-import { NativeModules } from 'react-native'
+import { NativeModules, NativeEventEmitter } from 'react-native'
 const { LocationServiceModule } = NativeModules
 var location = NativeModules.MyLocationDataManager
+const eventEmitter = new NativeEventEmitter(location)
 
 async function requestPermissions() {
   const result = await location.requestPermissions('')
@@ -61,6 +62,7 @@ const TaskSchema = {
     long: 'string',
     alt: 'string',
     direct: 'string',
+    accuracy: 'string',
     spd: 'string',
     timestamp: 'string',
     _id: 'int',
@@ -71,12 +73,14 @@ const TaskSchema = {
 const App = () => {
   const [currentLatitude, setCurrentLatitude] = useState(0.0)
   const [currentLongitude, setCurrentLongitude] = useState(0.0)
-  const [timeStamp, setTimeStamp] = useState(0.0)
+  const [altitude, setAltitude] = useState(0.0)
+  const [accuracy, setAccuracy] = useState(0.0)
+  const [speed, setSpeed] = useState(0.0)
+  const [timeStamp, setTimeStamp] = useState(0)
 
-  const [speed, setSpeed] = useState(0)
-  const [altitude, setAltitude] = useState(0)
   const [direction, setDirection] = useState('')
   const [state, setState] = useState({ events: [] })
+  const [newLoc, setNewLoc] = useState('0.0')
 
   var lastLatitude = 0.0
   var lastLongitude = 0.0
@@ -94,17 +98,40 @@ const App = () => {
     if (Platform.OS === 'android') {
       DeviceEventEmitter.addListener('location', function (e: Event) {
         console.log('DeviceEventEmitter Location Listener', e)
-        // console.log('latitude', e.latitude)
-        // console.log('longitude', e.longitude)
-        // console.log('altitude', e.altitude)
-        // console.log('accuracy', e.accuracy)
-        // console.log('speed', e.speed)
+        setCurrentLatitude(parseFloat(e.latitude))
+        setCurrentLongitude(parseFloat(e.longitude))
+        setAltitude(parseFloat(e.altitude))
+        setAccuracy(parseFloat(e.accuracy))
+        setSpeed(parseFloat(e.speed))
+        setTimeStamp(parseInt(e.timestamp))
 
-        // console.log('Address', e.address)
-        // console.log('City', e.city)
-        // console.log('State', e.state)
-        // console.log('Country', e.country)
+        addressToShow =
+          'LatLng:' +
+          e.latitude +
+          ',' +
+          e.longitude +
+          ',Alt:' +
+          e.altitude +
+          ',Acc:' +
+          e.accuracy +
+          ',Speed:' +
+          e.speed +
+          ',Time:' +
+          e.timestamp
+        setNewLoc(addressToShow)
       })
+    } else {
+      // Check if the native module exists before creating the NativeEventEmitter instance
+      if (eventEmitter) {
+        eventEmitter.addListener('significantLocationChange', data => {
+          console.log('Location from IOS:', data)
+        })
+        //eventEmitter.start();
+        //NativeModules.RNLocationChange.start()
+        console.log('DeviceEventEmitter Listener added')
+      } else {
+        console.error("Native module 'MyNativeModule' not found.")
+      }
     }
 
     //   Platform.OS === 'android'
@@ -114,8 +141,8 @@ const App = () => {
 
   const stopService = () => {
     Platform.OS === 'android' && LocationServiceModule.stopLocationService()
-    //: VoiceChangerModule.changeVoiceToChild()
-    //location.stop()
+    //:location.stop()
+    //NativeModules.RNLocationChange.stop();
   }
 
   const getOneTimeLocation = () => {
@@ -175,51 +202,78 @@ const App = () => {
         if (Platform.OS === 'android') requestBackgroundPermission()
         if (Platform.OS === 'ios') {
           requestPermissions()
+          if (eventEmitter) {
+            eventEmitter.addListener('significantLocationChange', data => {
+              console.log('Events traced:', data)
+              setCurrentLatitude(parseFloat(data.coords.latitude))
+              setCurrentLongitude(parseFloat(data.coords.longitude))
+              setAltitude(parseFloat(data.coords.altitude))
+              setAccuracy(parseFloat(data.coords.accuracy))
+              setSpeed(parseFloat(data.coords.speed))
+              setTimeStamp(parseInt(data.coords.timestamp))
+              console.log('Location parsed')
+            })
+          } else {
+            console.error("Native module 'MyNativeModule' not found.")
+          }
         }
 
         //Uncomment if you need location change in reactnative
-
         // getOneTimeLocation()
         // subscribeLocationLocation()
-        // console.log('Check Location', currentLatitude, currentLongitude)
-        // if (
-        //   currentLatitude != lastLatitude ||
-        //   currentLongitude != lastLongitude
-        // ) {
-        //   //todo need to Add check to save location only if location changed
-        //   console.log('Location Changed')
-        //   lastLatitude = currentLatitude
-        //   lastLongitude = currentLongitude
-        //   // use realm to interact with database
-        //   const realm = await Realm.open({
-        //     path: 'myrealm',
-        //     schema: [TaskSchema],
-        //   })
+        console.log('Check Location', currentLatitude, currentLongitude)
+        if (
+          currentLatitude != lastLatitude ||
+          currentLongitude != lastLongitude
+        ) {
+          //todo need to Add check to save location only if location changed
+          console.log('Location Changed')
+          lastLatitude = currentLatitude
+          lastLongitude = currentLongitude
+          // use realm to interact with database
+          const realm = await Realm.open({
+            path: 'myrealm',
+            schema: [TaskSchema],
+          })
 
-        //   // write records to database
-        //   realm.write(() => {
-        //     const task = realm.create('MapData', {
-        //       lat: currentLatitude.toString(),
-        //       long: currentLongitude.toString(),
-        //       alt: altitude.toString(),
-        //       direct: direction.toString(),
-        //       spd: speed.toString(),
-        //       timestamp: timeStamp.toString(),
-        //       _id: Date.now(),
-        //     })
-        //     console.log(
-        //       `created tasks Latitude: ${task.lat} Longitude: ${task.long}`,
-        //     )
-        //   })
+          //   // write records to database
+          realm.write(() => {
+            const task = realm.create('MapData', {
+              lat: currentLatitude.toString(),
+              long: currentLongitude.toString(),
+              alt: altitude.toString(),
+              direct: direction.toString(),
+              accuracy: accuracy.toString(),
+              spd: speed.toString(),
+              timestamp: timeStamp.toString(),
+              _id: Date.now(),
+            })
+            console.log(
+              `created tasks Latitude: ${task.lat} Longitude: ${task.long}`,
+            )
+          })
 
-        //   // ### read records from database
-        //   const tasks = realm.objects('MapData')
-        //   console.log(
-        //     `The lists of tasks are: ${tasks.map(task => {
-        //       return task.lat + ' ' + task.long + '\n\r'
-        //     })}`,
-        //   )
-        // }
+          //   // ### read records from database
+          const tasks = realm.objects('MapData')
+          console.log(
+            `The lists of tasks are: ${tasks.map(task => {
+              return (
+                task.lat +
+                ',Long:' +
+                task.long +
+                ',Alt:' +
+                task.alt +
+                ',accuracy:' +
+                task.accuracy +
+                ',Speed:' +
+                task.spd +
+                ',TimeStamp:' +
+                task.timestamp +
+                '\n\r'
+              )
+            })}`,
+          )
+        }
 
         // ### read 1 record from database
         // const myTask = realm.objectForPrimaryKey("Task", 1637096347792); // search for a realm object with a primary key that is an int.
@@ -294,8 +348,8 @@ const App = () => {
         </MapView>
 
         {/*Display user's current region:*/}
-        <Text style={styles.text}>Latitude: {region.latitude}</Text>
-        <Text style={styles.text}>Longitude: {region.longitude}</Text>
+        <Text style={styles.text}>{newLoc}</Text>
+
         <View
           style={{
             flexDirection: 'row',
@@ -417,6 +471,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     color: '#fff',
-    marginBottom: 25,
+    paddingHorizontal: 5,
+    marginBottom: 45,
   },
 })

@@ -3,7 +3,7 @@
 //
 
 #import "React/RCTBridgeModule.h"
-// #import <React/RCTEventEmitter.h>
-// @interface RNLocationChange : RCTEventEmitter <RCTBridgeModule>
-@interface MyLocationDataManager : NSObject <RCTBridgeModule>
+#import <React/RCTEventEmitter.h>
+//@interface RNLocationChange : RCTEventEmitter <RCTBridgeModule>
+@interface MyLocationDataManager : RCTEventEmitter <RCTBridgeModule>
 @end

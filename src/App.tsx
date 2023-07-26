@@ -211,6 +211,21 @@ const App = () => {
               setAccuracy(parseFloat(data.coords.accuracy))
               setSpeed(parseFloat(data.coords.speed))
               setTimeStamp(parseInt(data.coords.timestamp))
+
+              addressToShow =
+                'LatLng:' +
+                data.coords.latitude +
+                ',' +
+                data.coords.longitude +
+                ',Alt:' +
+                data.coords.altitude +
+                ',Acc:' +
+                data.coords.accuracy +
+                ',Speed:' +
+                data.coords.speed +
+                ',Time:' +
+                data.coords.timestamp
+              setNewLoc(addressToShow)
               console.log('Location parsed')
             })
           } else {

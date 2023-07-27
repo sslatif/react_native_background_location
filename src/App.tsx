@@ -28,10 +28,11 @@ async function requestPermissions() {
 // //request the permission before starting the service.
 async function requestBackgroundPermission() {
   try {
-    const backgroundgranted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+    const locationGranted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      // PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
       {
-        title: 'Background Location Permission',
+        title: 'Access Location Permission',
         message:
           'We need access to your location ' +
           'so you can get live quality updates.',
@@ -40,11 +41,26 @@ async function requestBackgroundPermission() {
         buttonPositive: 'OK',
       },
     )
-
-    if (backgroundgranted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Background location permission granted')
+    if (locationGranted === PermissionsAndroid.RESULTS.GRANTED) {
+      const backgroundgranted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+        {
+          title: 'Background Location Permission',
+          message:
+            'We need access to your location ' +
+            'so you can get live quality updates.',
+          buttonNeutral: 'Ask Me Later',
+          //buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      )
+      if (backgroundgranted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Background location permission granted')
+      } else {
+        console.log('Background location permission denied')
+      }
     } else {
-      console.log('Background location permission denied')
+      console.log('Access location permission denied')
     }
   } catch (error) {
     console.error(

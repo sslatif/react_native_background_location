@@ -160,9 +160,6 @@ public class GoogleService extends Service implements LocationListener {
     }
 
     private void fn_update(Location location) {
-        intent.putExtra("latutide", location.getLatitude() + "");
-        intent.putExtra("longitude", location.getLongitude() + "");
-
         try {
             WritableMap map = Arguments.createMap();
             map.putString("latitude", String.valueOf(location.getLatitude()));
@@ -176,7 +173,6 @@ public class GoogleService extends Service implements LocationListener {
             e.printStackTrace();
         }
         Log.d("onLocationChanged", "fn_update:LatLong:" + location.getLatitude() + "," + location.getLongitude());
-        //sendBroadcast(intent);
     }
 
     private void sendEvent(ReactContext reactContext, @Nullable WritableMap params) {

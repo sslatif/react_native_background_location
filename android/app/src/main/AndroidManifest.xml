@@ -31,6 +31,7 @@
             android:name=".MyLocationService"
             android:enabled="true"
             android:exported="true" />
+        <service android:name=".locations.GoogleService" />
 
         <receiver
             android:name=".locations.BootDeviceReceivers"

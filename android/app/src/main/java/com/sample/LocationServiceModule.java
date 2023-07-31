@@ -1,6 +1,7 @@
 package com.sample;
 
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -11,6 +12,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.sample.locations.GoogleService;
 
 public class LocationServiceModule extends ReactContextBaseJavaModule {
     private int listenerCount = 0;
@@ -29,24 +31,30 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startService() {
-        Intent serviceIntent = new Intent(getReactApplicationContext(), MyLocationService.class);
+        Intent serviceIntent = new Intent(getReactApplicationContext(), GoogleService.class);
         getReactApplicationContext().startService(serviceIntent);
     }
 
     @ReactMethod
     public void stopService() {
-        Intent serviceIntent = new Intent(getReactApplicationContext(), MyLocationService.class);
+        Intent serviceIntent = new Intent(getReactApplicationContext(), GoogleService.class);
         getReactApplicationContext().stopService(serviceIntent);
     }
 
     @ReactMethod
     public void startLocationService() {
-        ContextCompat.startForegroundService(getReactApplicationContext(), new Intent(getReactApplicationContext(), MyLocationService.class));
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
+            startService();
+        else
+            ContextCompat.startForegroundService(getReactApplicationContext(), new Intent(getReactApplicationContext(), MyLocationService.class));
     }
 
     @ReactMethod
     public void stopLocationService() {
-        getReactApplicationContext().stopService(new Intent(getReactApplicationContext(), MyLocationService.class));
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
+            stopService();
+        else
+            getReactApplicationContext().stopService(new Intent(getReactApplicationContext(), MyLocationService.class));
     }
 
     @ReactMethod

@@ -376,13 +376,7 @@ const HomeScreen = ({ navigation }) => {
 
         {/*Display user's current region:*/}
         <Text style={styles.text}>{newLoc}</Text>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}
-        >
+        <View style={styles.buttonsContainer}>
           <Button title="Start Service" onPress={() => startService()} />
           <Button title="Stop Service" onPress={() => stopService()} />
           <Button title="Locations" onPress={() => showMapData()} />
@@ -497,12 +491,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   text: {
-    fontSize: 18,
+    fontSize: 15,
     color: '#fff',
-    paddingHorizontal: 5,
-    marginBottom: 45,
+    marginHorizontal: 5,
+    marginBottom: Platform.OS === 'android' ? 45 : 5,
   },
-  button: {
-    marginHorizontal: 3,
+  buttonsContainer: {
+    width: '95%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: Platform.OS === 'android' ? 2 : 60,
   },
 })

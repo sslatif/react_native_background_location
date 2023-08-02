@@ -46,7 +46,7 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
             startService();
         else
-            ContextCompat.startForegroundService(getReactApplicationContext(), new Intent(getReactApplicationContext(), MyLocationService.class));
+            ContextCompat.startForegroundService(getReactApplicationContext(), new Intent(getReactApplicationContext(), GoogleService.class));
     }
 
     @ReactMethod
@@ -54,7 +54,7 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
             stopService();
         else
-            getReactApplicationContext().stopService(new Intent(getReactApplicationContext(), MyLocationService.class));
+            getReactApplicationContext().stopService(new Intent(getReactApplicationContext(), GoogleService.class));
     }
 
     @ReactMethod

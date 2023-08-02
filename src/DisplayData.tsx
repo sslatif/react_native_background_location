@@ -15,38 +15,38 @@ const DisplayData = ({ navigation }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      ;(async () => {
-        // use realm to interact with database
-        const realm = await Realm.open({
-          path: 'myrealm',
-          schema: [LocationSchema],
-        })
+      Realm.open({ schema: [LocationSchema] })
+        .then(realm => {
+          // Use the realm instance to read data from the database
+          const data = realm.objects('MapData')
 
-        //   // ### read records from database
-        const tasks = realm.objects('MapData')
-        const taskArray = Array.from(tasks) // Convert Realm object to an array to use with FlatList or other components.
-        console.log('Saved Locations:', taskArray.length)
-        setLocationData(taskArray)
-        console.log(
-          `Saved Locations are: ${tasks.map(task => {
-            return (
-              task.lat +
-              ',Long:' +
-              task.long +
-              ',Alt:' +
-              task.alt +
-              ',accuracy:' +
-              task.accuracy +
-              ',Speed:' +
-              task.spd +
-              ',TimeStamp:' +
-              task.timestamp +
-              '\n\r'
-            )
-          })}`,
-        )
-      })()
-    }, 2000)
+          const taskArray = Array.from(data) // Convert Realm object to an array to use with FlatList or other components.
+          console.log('Saved Locations:', taskArray.length)
+          setLocationData(taskArray)
+
+          console.log(
+            `Saved Locations are: ${data.map(task => {
+              return (
+                task.lat +
+                ',Long:' +
+                task.long +
+                ',Alt:' +
+                task.alt +
+                ',accuracy:' +
+                task.accuracy +
+                ',Speed:' +
+                task.spd +
+                ',TimeStamp:' +
+                task.timestamp +
+                '\n\r'
+              )
+            })}`,
+          )
+        })
+        .catch(error => {
+          console.error('Error opening Realm:', error)
+        })
+    }, 1000)
     return () => clearInterval(interval)
   }, [])
 
@@ -59,6 +59,9 @@ const DisplayData = ({ navigation }) => {
         )}
         renderItem={({ item }) => (
           <View style={{ flex: 1, flexDirection: 'column' }}>
+            <Text style={styles.textViewContainer}>
+              {'Time = ' + item.timestamp}
+            </Text>
             <Text style={styles.textViewContainer}>
               {'Latitude = ' + item.lat}
             </Text>
@@ -77,12 +80,12 @@ const DisplayData = ({ navigation }) => {
           </View>
         )}
       />
-      <Pressable
+      {/* <Pressable
         style={styles.button}
         onPress={() => navigation.navigate('home')}
       >
         <Text style={styles.TextStyle}>Go Home</Text>
-      </Pressable>
+      </Pressable> */}
     </View>
   )
 }

@@ -2,12 +2,15 @@ package com.sample.locations;
 
 import static com.sample.LocationServiceModule.reactContext;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -15,11 +18,13 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.sample.R;
 
 import java.util.List;
 import java.util.Timer;
@@ -49,6 +54,22 @@ public class GoogleService extends Service implements LocationListener {
     @Override
     public void onCreate() {
         super.onCreate();
+        String NOTIFICATION_CHANNEL_ID = "Location App";
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setOngoing(false)
+                .setSmallIcon(R.mipmap.ic_launcher);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    NOTIFICATION_CHANNEL_ID,
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            notificationChannel.setDescription(NOTIFICATION_CHANNEL_ID);
+            notificationChannel.setSound(null, null);
+            notificationManager.createNotificationChannel(notificationChannel);
+            startForeground(1, builder.build());
+        }
 
         Timer mTimer = new Timer();
         mTimer.schedule(new TimerTaskToGetLocation(), 5, notify_interval);

@@ -56,7 +56,7 @@ async function requestBackgroundPermission() {
           },
         )
         if (backgroundgranted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Background location permission granted')
+          //console.log('Background location permission granted')
         } else {
           console.log('Background location permission denied')
         }
@@ -88,6 +88,7 @@ const HomeScreen = ({ navigation }) => {
   const [state, setState] = useState({ events: [] })
   const [newLoc, setNewLoc] = useState('0.0')
 
+  var counter = 0
   var lastLatitude = 0.0
   var lastLongitude = 0.0
 
@@ -103,14 +104,16 @@ const HomeScreen = ({ navigation }) => {
 
     if (Platform.OS === 'android') {
       DeviceEventEmitter.addListener('location', function (e: Event) {
-        console.log('DeviceEventEmitter Location Listener', e)
+        //console.log('DeviceEventEmitter Location Listener', e)
         setCurrentLatitude(parseFloat(e.latitude))
         setCurrentLongitude(parseFloat(e.longitude))
         setAltitude(parseFloat(e.altitude))
         setAccuracy(parseFloat(e.accuracy))
         setSpeed(parseFloat(e.speed))
         setTimeStamp(parseInt(e.timestamp))
+        console.log('startService:Android', timeStamp)
 
+        //formatTimestampToDateTime(parseInt(e.timestamp))
         addressToShow =
           'LatLng:' +
           e.latitude +
@@ -208,124 +211,161 @@ const HomeScreen = ({ navigation }) => {
     )
   }
 
+  const formatTimestampToDateTime = newTimestamp => {
+    // Create a new Date object using the timestamp (converting from milliseconds to seconds)
+    const dateObject = new Date(newTimestamp)
+
+    // Extract the date and time components from the Date object
+    const year = dateObject.getFullYear()
+    const month = dateObject.getMonth() + 1 // Months are zero-based, so add 1
+    const day = dateObject.getDate()
+    const hours = dateObject.getHours()
+    const minutes = dateObject.getMinutes()
+    const seconds = dateObject.getSeconds()
+
+    // Create a formatted date and time string
+    const formattedDateTime = `${year}-${month
+      .toString()
+      .padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hours
+      .toString()
+      .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`
+
+    console.log('New date:', formattedDateTime)
+    return formattedDateTime
+  }
+
+  const writeDataToRealm = () => {
+    var dateTime = ''
+    if (timeStamp > 0) {
+      console.log('Time before', timeStamp)
+      dateTime = formatTimestampToDateTime(timeStamp)
+      console.log('Time After', dateTime)
+    } else {
+      dateTime = new Date().toLocaleString()
+    }
+
+    Realm.open({ schema: [LocationSchema] })
+      .then(realm => {
+        realm.write(() => {
+          const task = realm.create('MapData', {
+            lat: currentLatitude.toString(),
+            long: currentLongitude.toString(),
+            alt: altitude.toString(),
+            direct: direction.toString(),
+            accuracy: accuracy.toString(),
+            spd: speed.toString(),
+            timestamp: dateTime,
+            _id: Date.now(),
+          })
+          console.log(
+            `created tasks Home: ${task.lat} Longitude: ${task.long} Time: ${task.timestamp}`,
+          )
+        })
+      })
+      .catch(error => {
+        console.error('Error opening Realm:', error)
+      })
+  }
+
+  const readDataFromRealm = () => {
+    //### read records from database
+    Realm.open({ schema: [LocationSchema] })
+      .then(realm => {
+        const allPersons = realm.objects('MapData')
+        //    console.log(
+        //   `The lists of tasks are: ${tasks.map(task => {
+        //     return (
+        //       task.lat +
+        //       ',Long:' +
+        //       task.long +
+        //       ',Alt:' +
+        //       task.alt +
+        //       ',accuracy:' +
+        //       task.accuracy +
+        //       ',Speed:' +
+        //       task.spd +
+        //       ',TimeStamp:' +
+        //       task.timestamp +
+        //       '\n\r'
+        //     )
+        //   })}`,
+        // )
+
+        // Iterating through all persons
+        allPersons.forEach(data => {
+          console.log('Name:', data.lat)
+          console.log('Age:', data.long)
+        })
+
+        // Accessing individual objects
+        if (allPersons.length > 0) {
+          const firstPerson = allPersons[0]
+          console.log('First Person:', firstPerson)
+        }
+      })
+      .catch(error => {
+        console.error('Error opening Realm:', error)
+      })
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
-      ;(async () => {
-        if (Platform.OS === 'android') requestBackgroundPermission()
-        if (Platform.OS === 'ios') {
-          requestPermissions()
-          if (eventEmitter) {
-            eventEmitter.addListener('significantLocationChange', data => {
-              console.log('Events traced:', data)
-              setCurrentLatitude(parseFloat(data.coords.latitude))
-              setCurrentLongitude(parseFloat(data.coords.longitude))
-              setAltitude(parseFloat(data.coords.altitude))
-              setAccuracy(parseFloat(data.coords.accuracy))
-              setSpeed(parseFloat(data.coords.speed))
-              setTimeStamp(parseInt(data.coords.timestamp))
+      if (Platform.OS === 'android') requestBackgroundPermission()
+      if (Platform.OS === 'ios') {
+        requestPermissions()
+        if (eventEmitter) {
+          eventEmitter.addListener('significantLocationChange', data => {
+            console.log('Events traced:', data)
+            setCurrentLatitude(parseFloat(data.coords.latitude))
+            setCurrentLongitude(parseFloat(data.coords.longitude))
+            setAltitude(parseFloat(data.coords.altitude))
+            setAccuracy(parseFloat(data.coords.accuracy))
+            setSpeed(parseFloat(data.coords.speed))
+            setTimeStamp(parseInt(data.coords.timestamp))
 
-              addressToShow =
-                'LatLng:' +
-                data.coords.latitude +
-                ',' +
-                data.coords.longitude +
-                ',Alt:' +
-                data.coords.altitude +
-                ',Acc:' +
-                data.coords.accuracy +
-                ',Speed:' +
-                data.coords.speed +
-                ',Time:' +
-                data.coords.timestamp
-              setNewLoc(addressToShow)
-              console.log('Location parsed')
-            })
-          } else {
-            console.error("Native module 'MyNativeModule' not found.")
-          }
+            addressToShow =
+              'LatLng:' +
+              data.coords.latitude +
+              ',' +
+              data.coords.longitude +
+              ',Alt:' +
+              data.coords.altitude +
+              ',Acc:' +
+              data.coords.accuracy +
+              ',Speed:' +
+              data.coords.speed +
+              ',Time:' +
+              data.coords.timestamp
+            setNewLoc(addressToShow)
+            console.log('Address to show:IOS', addressToShow)
+          })
+        } else {
+          console.error("Native module 'MyNativeModule' not found.")
         }
-
-        //Uncomment if you need location change in reactnative
-        // getOneTimeLocation()
-        // subscribeLocationLocation()
-        console.log('Check Location', currentLatitude, currentLongitude)
+      }
+      counter++
+      console.log(
+        `Check Location: Latitude ${currentLatitude} Longitude: ${currentLongitude} Time:${timeStamp}`,
+      )
+      if (currentLatitude > 0 && currentLongitude > 0)
         if (
+          counter > 5 ||
           currentLatitude != lastLatitude ||
           currentLongitude != lastLongitude
         ) {
-          //todo need to Add check to save location only if location changed
-          console.log('Location Changed')
+          console.log(
+            `Location Changed: Latitude ${currentLatitude} Longitude: ${currentLongitude}`,
+          )
+
+          counter = 0
           lastLatitude = currentLatitude
           lastLongitude = currentLongitude
-          // use realm to interact with database
-          const realm = await Realm.open({
-            path: 'myrealm',
-            schema: [LocationSchema],
-          })
-
-          //   // write records to database
-          realm.write(() => {
-            const task = realm.create('MapData', {
-              lat: currentLatitude.toString(),
-              long: currentLongitude.toString(),
-              alt: altitude.toString(),
-              direct: direction.toString(),
-              accuracy: accuracy.toString(),
-              spd: speed.toString(),
-              timestamp: timeStamp.toString(),
-              _id: Date.now(),
-            })
-            console.log(
-              `created tasks Latitude: ${task.lat} Longitude: ${task.long}`,
-            )
-          })
-
-          //   // ### read records from database
-          const tasks = realm.objects('MapData')
-          console.log(
-            `The lists of tasks are: ${tasks.map(task => {
-              return (
-                task.lat +
-                ',Long:' +
-                task.long +
-                ',Alt:' +
-                task.alt +
-                ',accuracy:' +
-                task.accuracy +
-                ',Speed:' +
-                task.spd +
-                ',TimeStamp:' +
-                task.timestamp +
-                '\n\r'
-              )
-            })}`,
-          )
+          writeDataToRealm()
         }
-
-        // ### read 1 record from database
-        // const myTask = realm.objectForPrimaryKey("Task", 1637096347792); // search for a realm object with a primary key that is an int.
-        // console.log(`got task: ${myTask.name} & ${myTask._id}`);
-
-        // ### modify ONE record from database
-        // realm.write(() => {
-        //   let myTask = realm.objectForPrimaryKey("Task", 1637096347792);
-        //   console.log(`original task: ${myTask.name} & ${myTask._id} ${myTask.status}`);
-        //   myTask.status = "Closed"
-        // });
-
-        // ### delete ONE record from database
-        // realm.write(() => {
-        //   try {
-        //     let myTask = realm.objectForPrimaryKey('Task', 1637096312440)
-        //     realm.delete(myTask)
-        //     console.log('deleted task ')
-        //     myTask = null
-        //   } catch (error) {
-        //     console.log(error)
-        //   }
-        // })
-      })()
-    }, 5000)
+      //console.log('This will run every second!')
+    }, 1000)
     return () => clearInterval(interval)
   }, [currentLatitude, currentLongitude])
 
@@ -352,7 +392,6 @@ const HomeScreen = ({ navigation }) => {
             setCurrentLongitude(region.longitude)
           }}
           onRegionChangeComplete={region => {
-            console.log('onRegionChangeComplete')
             setRegion(region)
             setCurrentLatitude(region.latitude)
             setCurrentLongitude(region.longitude)

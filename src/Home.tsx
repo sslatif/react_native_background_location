@@ -13,7 +13,6 @@ import {
 import MapView, { Marker } from 'react-native-maps'
 import { PROVIDER_GOOGLE } from 'react-native-maps' // remove PROVIDER_GOOGLE import if not using Google Maps
 import Realm from 'realm'
-import Geolocation from '@react-native-community/geolocation'
 import { NativeModules, NativeEventEmitter } from 'react-native'
 import LocationSchema from './LocationScheme'
 const { LocationServiceModule } = NativeModules
@@ -88,9 +87,11 @@ const HomeScreen = ({ navigation }) => {
   const [state, setState] = useState({ events: [] })
   const [newLoc, setNewLoc] = useState('0.0')
 
-  var counter = 0
-  var lastLatitude = 0.0
-  var lastLongitude = 0.0
+  const [lastLatitude, setLastLatitude] = useState(0.0)
+  const [lastLongitude, setLastLongitude] = useState(0.0)
+  const [diffInSeconds, setDiffInSeconds] = useState(5)
+  const [lastEnteryTime, setLastEnteryTime] = useState(Date.now())
+  const [lastRecordId, setLastRecordId] = useState(-1)
 
   const [region, setRegion] = useState({
     latitude: 51.5079145,
@@ -111,9 +112,7 @@ const HomeScreen = ({ navigation }) => {
         setAccuracy(parseFloat(e.accuracy))
         setSpeed(parseFloat(e.speed))
         setTimeStamp(parseInt(e.timestamp))
-        console.log('startService:Android', timeStamp)
 
-        //formatTimestampToDateTime(parseInt(e.timestamp))
         addressToShow =
           'LatLng:' +
           e.latitude +
@@ -126,7 +125,7 @@ const HomeScreen = ({ navigation }) => {
           ',Speed:' +
           e.speed +
           ',Time:' +
-          e.timestamp
+          formatTimestampToDateTime(parseInt(e.timestamp))
         setNewLoc(addressToShow)
       })
     } else {
@@ -160,57 +159,6 @@ const HomeScreen = ({ navigation }) => {
     })
   }
 
-  const getOneTimeLocation = () => {
-    console.log('getOneTimeLocation ...')
-    Geolocation.getCurrentPosition(
-      //Will give you the current location
-      position => {
-        const altitude = JSON.stringify(position.coords.altitude)
-        const speed = JSON.stringify(position.coords.speed)
-
-        setCurrentLatitude(position.coords.latitude)
-        setCurrentLongitude(position.coords.longitude)
-        setTimeStamp(position.timestamp)
-        setAltitude(parseInt(altitude))
-        setSpeed(parseInt(speed))
-        console.log('Location updated', currentLatitude)
-      },
-      error => {
-        console.log('Getting Location Error:', error.message)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 3000000,
-        maximumAge: 1000,
-      },
-    )
-  }
-
-  const subscribeLocationLocation = () => {
-    console.log('subscribeLocation...')
-    Geolocation.watchPosition(
-      position => {
-        //Will give you the location on location change
-        const altitude = JSON.stringify(position.coords.altitude)
-        const speed = JSON.stringify(position.coords.speed)
-
-        setCurrentLatitude(position.coords.latitude)
-        setCurrentLongitude(position.coords.longitude)
-        setTimeStamp(position.timestamp)
-        setAltitude(parseInt(altitude))
-        setSpeed(parseInt(speed))
-        console.log('Location updated', currentLatitude)
-      },
-      error => {
-        console.log('Getting Frequent location Error:', error.message)
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 1000,
-      },
-    )
-  }
-
   const formatTimestampToDateTime = newTimestamp => {
     // Create a new Date object using the timestamp (converting from milliseconds to seconds)
     const dateObject = new Date(newTimestamp)
@@ -232,85 +180,109 @@ const HomeScreen = ({ navigation }) => {
       .toString()
       .padStart(2, '0')}`
 
-    console.log('New date:', formattedDateTime)
+    //console.log('New date:', formattedDateTime)
     return formattedDateTime
   }
 
-  const writeDataToRealm = () => {
-    var dateTime = ''
-    if (timeStamp > 0) {
-      console.log('Time before', timeStamp)
-      dateTime = formatTimestampToDateTime(timeStamp)
-      console.log('Time After', dateTime)
-    } else {
-      dateTime = new Date().toLocaleString()
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371 // Earth's radius in kilometers
+    //const R = 6371e3 // Earth's radius in meters
+
+    const toRadians = angle => {
+      return angle * (Math.PI / 180)
     }
 
-    Realm.open({ schema: [LocationSchema] })
-      .then(realm => {
-        realm.write(() => {
-          const task = realm.create('MapData', {
-            lat: currentLatitude.toString(),
-            long: currentLongitude.toString(),
-            alt: altitude.toString(),
-            direct: direction.toString(),
-            accuracy: accuracy.toString(),
-            spd: speed.toString(),
-            timestamp: dateTime,
-            _id: Date.now(),
-          })
-          console.log(
-            `created tasks Home: ${task.lat} Longitude: ${task.long} Time: ${task.timestamp}`,
-          )
-        })
-      })
-      .catch(error => {
-        console.error('Error opening Realm:', error)
-      })
+    const dLat = toRadians(lat2 - lat1)
+    const dLon = toRadians(lon2 - lon1)
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    const distance = R * c * 1000
+
+    return distance // distance in meters
   }
 
-  const readDataFromRealm = () => {
-    //### read records from database
-    Realm.open({ schema: [LocationSchema] })
-      .then(realm => {
-        const allPersons = realm.objects('MapData')
-        //    console.log(
-        //   `The lists of tasks are: ${tasks.map(task => {
-        //     return (
-        //       task.lat +
-        //       ',Long:' +
-        //       task.long +
-        //       ',Alt:' +
-        //       task.alt +
-        //       ',accuracy:' +
-        //       task.accuracy +
-        //       ',Speed:' +
-        //       task.spd +
-        //       ',TimeStamp:' +
-        //       task.timestamp +
-        //       '\n\r'
-        //     )
-        //   })}`,
-        // )
+  const getTimeDifferenceInMilliseconds = (timestamp1, timestamp2) => {
+    const date1 = new Date(timestamp1)
+    const date2 = new Date(timestamp2)
 
-        // Iterating through all persons
-        allPersons.forEach(data => {
-          console.log('Name:', data.lat)
-          console.log('Age:', data.long)
+    // Calculate the time difference in milliseconds
+    const differenceInMilliseconds = Math.abs(date2.getTime() - date1.getTime())
+
+    return differenceInMilliseconds
+  }
+
+  const checkAndStoreData = () => {
+    const distance = getDistance(
+      lastLatitude,
+      lastLongitude,
+      currentLatitude,
+      currentLongitude,
+    )
+
+    setDiffInSeconds(getTimeDifferenceInMilliseconds(lastEnteryTime, timeStamp))
+
+    if (distance > 10 && diffInSeconds > 5000) {
+      setDiffInSeconds(0)
+      console.log(
+        '*************  TIME RESET  diffInSeconds *************',
+        diffInSeconds,
+      )
+      setLastEnteryTime(Date.now())
+
+      setLastLatitude(currentLatitude)
+      setLastLongitude(currentLongitude)
+      if (currentLatitude != 0 && currentLongitude != 0) writeDataToRealm()
+    } else {
+      if (distance < 10) {
+        console.log(
+          `Distance:${distance} :: Latitude ${currentLatitude} :: Longitude: ${currentLongitude} :: LastLatitude:${lastLatitude} :: lastLongitude:${lastLongitude}`,
+        )
+      }
+      console.log('Time difference in seconds:', diffInSeconds)
+    }
+  }
+
+  const writeDataToRealm = () => {
+    if (lastRecordId == Date.now()) {
+      console.log('Record already exist!!')
+    } else {
+      var dateTime = new Date().toLocaleString()
+      setLastRecordId(Date.now())
+      Realm.open({ schema: [LocationSchema] })
+        .then(realm => {
+          realm.write(() => {
+            const task = realm.create('MapData', {
+              lat: currentLatitude.toString(),
+              long: currentLongitude.toString(),
+              alt: altitude.toString(),
+              direct: direction.toString(),
+              accuracy: accuracy.toString(),
+              spd: speed.toString(),
+              timestamp: dateTime,
+              _id: lastRecordId,
+            })
+            console.log(
+              `created tasks Home: ${task.lat} Longitude: ${task.long} Time: ${task.timestamp}`,
+            )
+          })
         })
-
-        // Accessing individual objects
-        if (allPersons.length > 0) {
-          const firstPerson = allPersons[0]
-          console.log('First Person:', firstPerson)
-        }
-      })
-      .catch(error => {
-        console.error('Error opening Realm:', error)
-      })
+        .catch(error => {
+          console.error('Error opening Realm:', error)
+        })
+    }
   }
 
   useEffect(() => {
+    checkAndStoreData()
+  }, [currentLatitude, currentLongitude, accuracy, altitude, speed, timeStamp])
+
+  useEffect(() => {
+    //Check and Save data timebased
     const interval = setInterval(() => {
       if (Platform.OS === 'android') requestBackgroundPermission()
       if (Platform.OS === 'ios') {
@@ -345,29 +317,10 @@ const HomeScreen = ({ navigation }) => {
           console.error("Native module 'MyNativeModule' not found.")
         }
       }
-      counter++
-      console.log(
-        `Check Location: Latitude ${currentLatitude} Longitude: ${currentLongitude} Time:${timeStamp}`,
-      )
-      if (currentLatitude > 0 && currentLongitude > 0)
-        if (
-          counter > 5 ||
-          currentLatitude != lastLatitude ||
-          currentLongitude != lastLongitude
-        ) {
-          console.log(
-            `Location Changed: Latitude ${currentLatitude} Longitude: ${currentLongitude}`,
-          )
-
-          counter = 0
-          lastLatitude = currentLatitude
-          lastLongitude = currentLongitude
-          writeDataToRealm()
-        }
-      //console.log('This will run every second!')
+      //checkAndStoreData()
     }, 1000)
     return () => clearInterval(interval)
-  }, [currentLatitude, currentLongitude])
+  }, [])
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -388,8 +341,8 @@ const HomeScreen = ({ navigation }) => {
           followsUserLocation={true}
           onRegionChange={region => {
             setRegion(region)
-            setCurrentLatitude(region.latitude)
-            setCurrentLongitude(region.longitude)
+            //setCurrentLatitude(region.latitude)
+            //setCurrentLongitude(region.longitude)
           }}
           onRegionChangeComplete={region => {
             setRegion(region)

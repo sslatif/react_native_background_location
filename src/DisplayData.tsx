@@ -14,7 +14,8 @@ const DisplayData = ({ navigation }) => {
   const [locationData, setLocationData] = useState([])
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const timerId = setTimeout(() => {
+      console.log('Fetching data from DB')
       Realm.open({ schema: [LocationSchema] })
         .then(realm => {
           // Use the realm instance to read data from the database
@@ -23,32 +24,17 @@ const DisplayData = ({ navigation }) => {
           const taskArray = Array.from(data) // Convert Realm object to an array to use with FlatList or other components.
           console.log('Saved Locations:', taskArray.length)
           setLocationData(taskArray)
-
-          console.log(
-            `Saved Locations are: ${data.map(task => {
-              return (
-                task.lat +
-                ',Long:' +
-                task.long +
-                ',Alt:' +
-                task.alt +
-                ',accuracy:' +
-                task.accuracy +
-                ',Speed:' +
-                task.spd +
-                ',TimeStamp:' +
-                task.timestamp +
-                '\n\r'
-              )
-            })}`,
-          )
         })
         .catch(error => {
           console.error('Error opening Realm:', error)
         })
     }, 1000)
-    return () => clearInterval(interval)
-  }, [])
+
+    // Clean up the timer when the component unmounts (optional)
+    return () => {
+      clearTimeout(timerId)
+    }
+  }, []) // Empty dependency array means the effect runs only once on component mount
 
   return (
     <View>

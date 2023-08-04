@@ -26,6 +26,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.sample.R;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -183,8 +184,12 @@ public class GoogleService extends Service implements LocationListener {
     private void fn_update(Location location) {
         try {
             WritableMap map = Arguments.createMap();
-            map.putString("latitude", String.valueOf(location.getLatitude()));
-            map.putString("longitude", String.valueOf(location.getLongitude()));
+            DecimalFormat decimalFormat = new DecimalFormat("0.0000");
+            map.putString("latitude", decimalFormat.format(location.getLatitude()));
+            map.putString("longitude", decimalFormat.format(location.getLongitude()));
+            // map.putString("latitude", String.valueOf(location.getLatitude()));
+            // map.putString("longitude", String.valueOf(location.getLongitude()));
+
             map.putString("altitude", String.valueOf(location.getAltitude()));
             map.putString("accuracy", String.valueOf(location.getAccuracy()));
             map.putString("speed", String.valueOf(location.getSpeed()));

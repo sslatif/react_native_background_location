@@ -90,6 +90,7 @@ const HomeScreen = ({ navigation }) => {
   const [lastLatitude, setLastLatitude] = useState(0.0)
   const [lastLongitude, setLastLongitude] = useState(0.0)
   const [diffInSeconds, setDiffInSeconds] = useState(5)
+  const [distanceInMeter, setDistanceInMeter] = useState(0.0)
   const [lastEnteryTime, setLastEnteryTime] = useState(Date.now())
   const [lastRecordId, setLastRecordId] = useState(-1)
 
@@ -217,20 +218,21 @@ const HomeScreen = ({ navigation }) => {
   }
 
   const checkAndStoreData = () => {
-    const distance = getDistance(
-      lastLatitude,
-      lastLongitude,
-      currentLatitude,
-      currentLongitude,
+    setDistanceInMeter(
+      getDistance(
+        lastLatitude,
+        lastLongitude,
+        currentLatitude,
+        currentLongitude,
+      ),
     )
 
     setDiffInSeconds(getTimeDifferenceInMilliseconds(lastEnteryTime, timeStamp))
 
-    if (distance > 10 && diffInSeconds > 5000) {
+    if (distanceInMeter > 10 && diffInSeconds > 5000) {
       setDiffInSeconds(0)
       console.log(
-        '*************  TIME RESET  diffInSeconds *************',
-        diffInSeconds,
+        `*************  TIME RESET  ************* SEC: ${diffInSeconds} Dist: ${distanceInMeter}`,
       )
       setLastEnteryTime(Date.now())
 
@@ -238,9 +240,9 @@ const HomeScreen = ({ navigation }) => {
       setLastLongitude(currentLongitude)
       if (currentLatitude != 0 && currentLongitude != 0) writeDataToRealm()
     } else {
-      if (distance < 10) {
+      if (distanceInMeter < 10) {
         console.log(
-          `Distance:${distance} :: Latitude ${currentLatitude} :: Longitude: ${currentLongitude} :: LastLatitude:${lastLatitude} :: lastLongitude:${lastLongitude}`,
+          `Distance:${distanceInMeter} :: Latitude ${currentLatitude} :: Longitude: ${currentLongitude} :: LastLatitude:${lastLatitude} :: lastLongitude:${lastLongitude}`,
         )
       }
       console.log('Time difference in seconds:', diffInSeconds)
@@ -264,10 +266,10 @@ const HomeScreen = ({ navigation }) => {
               accuracy: accuracy.toString(),
               spd: speed.toString(),
               timestamp: dateTime,
-              _id: lastRecordId,
+              _id: lastRecordId === -1 ? Date.now() : lastRecordId,
             })
             console.log(
-              `created tasks Home: ${task.lat} Longitude: ${task.long} Time: ${task.timestamp}`,
+              `created tasks Home:Id:${lastRecordId} Lat:${task.lat} Long: ${task.long} Time: ${task.timestamp}`,
             )
           })
         })
@@ -346,8 +348,8 @@ const HomeScreen = ({ navigation }) => {
           }}
           onRegionChangeComplete={region => {
             setRegion(region)
-            setCurrentLatitude(region.latitude)
-            setCurrentLongitude(region.longitude)
+            setCurrentLatitude(parseFloat(region.latitude.toFixed(4)))
+            setCurrentLongitude(parseFloat(region.longitude.toFixed(4)))
             console.log('Region change Completed', currentLatitude)
           }}
           customMapStyle={mapStyle}

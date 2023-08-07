@@ -229,7 +229,7 @@ const HomeScreen = ({ navigation }) => {
 
     setDiffInSeconds(getTimeDifferenceInMilliseconds(lastEnteryTime, timeStamp))
 
-    if (distanceInMeter > 10 && diffInSeconds > 5000) {
+    if (distanceInMeter > 5 && diffInSeconds > 30000) {
       setDiffInSeconds(0)
       console.log(
         `*************  TIME RESET  ************* SEC: ${diffInSeconds} Dist: ${distanceInMeter}`,
@@ -240,12 +240,11 @@ const HomeScreen = ({ navigation }) => {
       setLastLongitude(currentLongitude)
       if (currentLatitude != 0 && currentLongitude != 0) writeDataToRealm()
     } else {
-      if (distanceInMeter < 10) {
-        console.log(
-          `Distance:${distanceInMeter} :: Latitude ${currentLatitude} :: Longitude: ${currentLongitude} :: LastLatitude:${lastLatitude} :: lastLongitude:${lastLongitude}`,
-        )
-      }
-      console.log('Time difference in seconds:', diffInSeconds)
+      console.log(
+        `Distance=${distanceInMeter.toFixed(
+          3,
+        )} | Time=${diffInSeconds} | Latitude=${currentLatitude} | Longitude= ${currentLongitude} | LastLat=${lastLatitude} | lastLong=${lastLongitude}`,
+      )
     }
   }
 

@@ -62,6 +62,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public int deleteItem(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete("Location", "_id = ?", new String[]{String.valueOf(id)});
+        String whereClause = "_id < ?";
+        String[] whereArgs = new String[]{String.valueOf(id)};
+        int deletedRows = db.delete(TABLE_NAME, whereClause, whereArgs);
+        if (deletedRows > 0) {
+            Log.d("Database", "Old data deleted successfully");
+        } else {
+            Log.d("Database", "Deletion failed or no rows matched the criteria");
+        }
+
+        //db.close();
+        return deletedRows;//db.delete(TABLE_NAME, "_id = ?", new String[]{String.valueOf(id)});
+    }
+
+    public void deleteAllData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME, null, null);
+        //db.close();
     }
 }

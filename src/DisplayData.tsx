@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Text, FlatList, Platform } from 'react-native'
-import { fetchItems } from './SQLiteBridge' // Adjust the path accordingly
+import {
+  View,
+  StyleSheet,
+  Text,
+  FlatList,
+  Platform,
+  Button,
+} from 'react-native'
+import { fetchItems, deleteAll, deleteOldData } from './SQLiteBridge' // Adjust the path accordingly
 
 const DisplayData = ({ navigation }) => {
   const [locationData, setLocationData] = useState([])
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      console.log('Fetching data from DB')
-      fetchItems()
-        .then(itemsArray => {
-          console.log('Data fetched Successfully:', itemsArray)
-          console.log('Saved Locations:', itemsArray.length)
-          setLocationData(itemsArray)
-        })
-        .catch(error => {
-          console.error('Error fetching items:', error)
-        })
+      getDataFromDb()
 
       // Realm.open({ schema: [LocationSchema] })
       //   .then(realm => {
@@ -38,8 +36,32 @@ const DisplayData = ({ navigation }) => {
     }
   }, []) // Empty dependency array means the effect runs only once on component mount
 
+  const getDataFromDb = () => {
+    console.log('Fetching data from DB')
+
+    fetchItems()
+      .then(itemsArray => {
+        console.log('Data fetched Successfully:', itemsArray)
+        console.log('Saved Locations:', itemsArray.length)
+        setLocationData(itemsArray)
+      })
+      .catch(error => {
+        console.error('Error fetching items:', error)
+      })
+  }
+
+  const deleteSelectedRecords = () => {
+    deleteOldData(1)
+  }
+
+  const deleteAllData = () => {
+    deleteAll()
+    getDataFromDb()
+  }
+
   return (
     <View>
+      <Button title="Delete All" onPress={() => deleteAllData()} />
       <FlatList
         data={locationData}
         ItemSeparatorComponent={() => (
@@ -68,12 +90,6 @@ const DisplayData = ({ navigation }) => {
           </View>
         )}
       />
-      {/* <Pressable
-        style={styles.button}
-        onPress={() => navigation.navigate('home')}
-      >
-        <Text style={styles.TextStyle}>Go Home</Text>
-      </Pressable> */}
     </View>
   )
 }

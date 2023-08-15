@@ -3,7 +3,6 @@ package com.sample;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -30,12 +30,13 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
     private int listenerCount = 0;
     public static ReactContext reactContext;
     private SQLiteDatabase db;
+    private DatabaseHelper dbHelper;
 
     LocationServiceModule(ReactApplicationContext context) {
         super(context);
         try {
             reactContext = context;
-            SQLiteOpenHelper dbHelper = new DatabaseHelper(reactContext);
+            dbHelper = new DatabaseHelper(reactContext);
             db = dbHelper.getReadableDatabase();
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,6 +72,26 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
             successCallback.invoke(itemsArray);
         } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void deleteSelectedRecords(int id, Promise promise) {
+        try {
+            int success = dbHelper.deleteItem(id);
+            promise.resolve(success > 0); // Resolve the promise when deletion is successful
+        } catch (Exception e) {
+            promise.reject("DELETE_FAILED", e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void deleteAllData(Promise promise) {
+        try {
+            dbHelper.deleteAllData();
+            promise.resolve(true); // Resolve the promise when deletion is successful
+        } catch (Exception e) {
+            promise.reject("DELETE_ALL_FAILED", e.getMessage());
         }
     }
 

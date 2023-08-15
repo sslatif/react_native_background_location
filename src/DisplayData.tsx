@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Text,
-  FlatList,
-  Platform,
-} from 'react-native'
-import LocationSchema from './LocationScheme'
-import Realm from 'realm'
+import { View, StyleSheet, Text, FlatList, Platform } from 'react-native'
+import { fetchItems } from './SQLiteBridge' // Adjust the path accordingly
 
 const DisplayData = ({ navigation }) => {
   const [locationData, setLocationData] = useState([])
@@ -16,18 +8,28 @@ const DisplayData = ({ navigation }) => {
   useEffect(() => {
     const timerId = setTimeout(() => {
       console.log('Fetching data from DB')
-      Realm.open({ schema: [LocationSchema] })
-        .then(realm => {
-          // Use the realm instance to read data from the database
-          const data = realm.objects('MapData')
-
-          const taskArray = Array.from(data) // Convert Realm object to an array to use with FlatList or other components.
-          console.log('Saved Locations:', taskArray.length)
-          setLocationData(taskArray)
+      fetchItems()
+        .then(itemsArray => {
+          console.log('Data fetched Successfully:', itemsArray)
+          console.log('Saved Locations:', itemsArray.length)
+          setLocationData(itemsArray)
         })
         .catch(error => {
-          console.error('Error opening Realm:', error)
+          console.error('Error fetching items:', error)
         })
+
+      // Realm.open({ schema: [LocationSchema] })
+      //   .then(realm => {
+      //     // Use the realm instance to read data from the database
+      //     const data = realm.objects('MapData')
+
+      //     const taskArray = Array.from(data) // Convert Realm object to an array to use with FlatList or other components.
+      //     console.log('Saved Locations:', taskArray.length)
+      //     setLocationData(taskArray)
+      //   })
+      //   .catch(error => {
+      //     console.error('Error opening Realm:', error)
+      //   })
     }, 1000)
 
     // Clean up the timer when the component unmounts (optional)
@@ -46,22 +48,22 @@ const DisplayData = ({ navigation }) => {
         renderItem={({ item }) => (
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <Text style={styles.textViewContainer}>
-              {'Time = ' + item.timestamp}
+              {'Time = ' + item.timeStamps}
             </Text>
             <Text style={styles.textViewContainer}>
-              {'Latitude = ' + item.lat}
+              {'Latitude = ' + item.latitude}
             </Text>
             <Text style={styles.textViewContainer}>
-              {'Longitude = ' + item.long}
+              {'Longitude = ' + item.longitude}
             </Text>
             <Text style={styles.textViewContainer}>
-              {'Altitude = ' + item.alt}
+              {'Altitude = ' + item.altitude}
             </Text>
             <Text style={styles.textViewContainer}>
               {'Accuracy = ' + item.accuracy}
             </Text>
             <Text style={styles.textViewContainer}>
-              {'Speed = ' + item.spd}
+              {'Speed = ' + item.speed}
             </Text>
           </View>
         )}

@@ -12,9 +12,9 @@ import {
 } from 'react-native'
 import MapView, { Marker } from 'react-native-maps'
 import { PROVIDER_GOOGLE } from 'react-native-maps' // remove PROVIDER_GOOGLE import if not using Google Maps
+
 import Realm from 'realm'
 import { NativeModules, NativeEventEmitter } from 'react-native'
-import LocationSchema from './LocationScheme'
 const { LocationServiceModule } = NativeModules
 var location = NativeModules.MyLocationDataManager
 const eventEmitter = new NativeEventEmitter(location)
@@ -60,9 +60,9 @@ async function requestBackgroundPermission() {
           console.log('Background location permission denied')
         }
       } else {
-        console.log(
-          'Background location permission is not required on this Android version.',
-        )
+        // console.log(
+        //   'Background location permission is not required on this Android version.',
+        // )
       }
     } else {
       console.log('Access location permission denied')
@@ -106,7 +106,7 @@ const HomeScreen = ({ navigation }) => {
 
     if (Platform.OS === 'android') {
       DeviceEventEmitter.addListener('location', function (e: Event) {
-        //console.log('DeviceEventEmitter Location Listener', e)
+        console.log('DeviceEventEmitter Location Listener', e)
         setCurrentLatitude(parseFloat(e.latitude))
         setCurrentLongitude(parseFloat(e.longitude))
         setAltitude(parseFloat(e.altitude))
@@ -185,101 +185,104 @@ const HomeScreen = ({ navigation }) => {
     return formattedDateTime
   }
 
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371 // Earth's radius in kilometers
-    //const R = 6371e3 // Earth's radius in meters
+  // ******* Now we will store data in Android/Ios Native app
 
-    const toRadians = angle => {
-      return angle * (Math.PI / 180)
-    }
+  // const getDistance = (lat1, lon1, lat2, lon2) => {
+  //   const R = 6371 // Earth's radius in kilometers
+  //   //const R = 6371e3 // Earth's radius in meters
 
-    const dLat = toRadians(lat2 - lat1)
-    const dLon = toRadians(lon2 - lon1)
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) *
-        Math.cos(toRadians(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    const distance = R * c * 1000
+  //   const toRadians = angle => {
+  //     return angle * (Math.PI / 180)
+  //   }
 
-    return distance // distance in meters
-  }
+  //   const dLat = toRadians(lat2 - lat1)
+  //   const dLon = toRadians(lon2 - lon1)
+  //   const a =
+  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  //     Math.cos(toRadians(lat1)) *
+  //       Math.cos(toRadians(lat2)) *
+  //       Math.sin(dLon / 2) *
+  //       Math.sin(dLon / 2)
+  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  //   const distance = R * c * 1000
 
-  const getTimeDifferenceInMilliseconds = (timestamp1, timestamp2) => {
-    const date1 = new Date(timestamp1)
-    const date2 = new Date(timestamp2)
+  //   return distance // distance in meters
+  // }
 
-    // Calculate the time difference in milliseconds
-    const differenceInMilliseconds = Math.abs(date2.getTime() - date1.getTime())
+  // const getTimeDifferenceInMilliseconds = (timestamp1, timestamp2) => {
+  //   const date1 = new Date(timestamp1)
+  //   const date2 = new Date(timestamp2)
 
-    return differenceInMilliseconds
-  }
+  //   // Calculate the time difference in milliseconds
+  //   const differenceInMilliseconds = Math.abs(date2.getTime() - date1.getTime())
 
-  const checkAndStoreData = () => {
-    setDistanceInMeter(
-      getDistance(
-        lastLatitude,
-        lastLongitude,
-        currentLatitude,
-        currentLongitude,
-      ),
-    )
+  //   return differenceInMilliseconds
+  // }
 
-    setDiffInSeconds(getTimeDifferenceInMilliseconds(lastEnteryTime, timeStamp))
+  // const checkAndStoreData = () => {
+  //   setDistanceInMeter(
+  //     getDistance(
+  //       lastLatitude,
+  //       lastLongitude,
+  //       currentLatitude,
+  //       currentLongitude,
+  //     ),
+  //   )
 
-    if (distanceInMeter > 5 && diffInSeconds > 30000) {
-      setDiffInSeconds(0)
-      console.log(
-        `*************  TIME RESET  ************* SEC: ${diffInSeconds} Dist: ${distanceInMeter}`,
-      )
-      setLastEnteryTime(Date.now())
+  //   setDiffInSeconds(getTimeDifferenceInMilliseconds(lastEnteryTime, timeStamp))
 
-      setLastLatitude(currentLatitude)
-      setLastLongitude(currentLongitude)
-      if (currentLatitude != 0 && currentLongitude != 0) writeDataToRealm()
-    } else {
-      console.log(
-        `Distance=${distanceInMeter.toFixed(
-          3,
-        )} | Time=${diffInSeconds} | Latitude=${currentLatitude} | Longitude= ${currentLongitude} | LastLat=${lastLatitude} | lastLong=${lastLongitude}`,
-      )
-    }
-  }
+  //   if (distanceInMeter > 5 && diffInSeconds > 30000) {
+  //     setDiffInSeconds(0)
+  //     console.log(
+  //       `*************  TIME RESET  ************* SEC: ${diffInSeconds} Dist: ${distanceInMeter}`,
+  //     )
+  //     setLastEnteryTime(Date.now())
 
-  const writeDataToRealm = () => {
-    if (lastRecordId == Date.now()) {
-      console.log('Record already exist!!')
-    } else {
-      var dateTime = new Date().toLocaleString()
-      setLastRecordId(Date.now())
-      Realm.open({ schema: [LocationSchema] })
-        .then(realm => {
-          realm.write(() => {
-            const task = realm.create('MapData', {
-              lat: currentLatitude.toString(),
-              long: currentLongitude.toString(),
-              alt: altitude.toString(),
-              direct: direction.toString(),
-              accuracy: accuracy.toString(),
-              spd: speed.toString(),
-              timestamp: dateTime,
-              _id: lastRecordId === -1 ? Date.now() : lastRecordId,
-            })
-            console.log(
-              `created tasks Home:Id:${lastRecordId} Lat:${task.lat} Long: ${task.long} Time: ${task.timestamp}`,
-            )
-          })
-        })
-        .catch(error => {
-          console.error('Error opening Realm:', error)
-        })
-    }
-  }
+  //     setLastLatitude(currentLatitude)
+  //     setLastLongitude(currentLongitude)
+  //     if (currentLatitude != 0 && currentLongitude != 0) writeDataToRealm()
+  //   } else {
+  //     console.log(
+  //       `Distance=${distanceInMeter.toFixed(
+  //         3,
+  //       )} | Time=${diffInSeconds} | Latitude=${currentLatitude} | Longitude= ${currentLongitude} | LastLat=${lastLatitude} | lastLong=${lastLongitude}`,
+  //     )
+  //   }
+  // }
+
+  // const writeDataToRealm = () => {
+  //   if (lastRecordId == Date.now()) {
+  //     console.log('Record already exist!!')
+  //   } else {
+  //     var dateTime = new Date().toLocaleString()
+  //     setLastRecordId(Date.now())
+  //     Realm.open({ schema: [LocationSchema] })
+  //       .then(realm => {
+  //         realm.write(() => {
+  //           const task = realm.create('MapData', {
+  //             lat: currentLatitude.toString(),
+  //             long: currentLongitude.toString(),
+  //             alt: altitude.toString(),
+  //             direct: direction.toString(),
+  //             accuracy: accuracy.toString(),
+  //             spd: speed.toString(),
+  //             timestamp: dateTime,
+  //             _id: lastRecordId === -1 ? Date.now() : lastRecordId,
+  //           })
+  //           console.log(
+  //             `created tasks Home:Id:${lastRecordId} Lat:${task.lat} Long: ${task.long} Time: ${task.timestamp}`,
+  //           )
+  //         })
+  //       })
+  //       .catch(error => {
+  //         console.error('Error opening Realm:', error)
+  //       })
+  //   }
+  // }
 
   useEffect(() => {
-    checkAndStoreData()
+    //Todo do whatever
+    //checkAndStoreData()
   }, [currentLatitude, currentLongitude, accuracy, altitude, speed, timeStamp])
 
   useEffect(() => {

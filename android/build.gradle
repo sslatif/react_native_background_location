@@ -14,8 +14,15 @@ buildscript {
         google()
         mavenCentral()
     }
+    allprojects {
+        repositories {
+            google()
+            mavenCentral() // add this line
+        }
+    }
     dependencies {
         classpath("com.android.tools.build:gradle:7.3.1")
         classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("io.realm:realm-gradle-plugin:10.11.1")
     }
 }

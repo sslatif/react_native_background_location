@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply plugin: "realm-android"
 
 import com.android.build.OutputFile
 
@@ -146,6 +147,10 @@ android {
 
         }
     }
+}
+
+realm {
+    syncEnabled = true
 }
 
 dependencies {

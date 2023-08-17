@@ -14,8 +14,6 @@
 		468A07F62A6925D200387006 /* MyLocationDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 468A07F52A6925D200387006 /* MyLocationDataManager.m */; };
 		46B818EC2A8E8F66009853BF /* LocationData.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B818EB2A8E8F66009853BF /* LocationData.m */; };
 		46CF2F7D2A8CC77C0031E6AE /* DBManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46CF2F7C2A8CC77C0031E6AE /* DBManager.m */; };
-		46D899482A8E0DE7001849A0 /* VoiceChangingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D899472A8E0DE7001849A0 /* VoiceChangingModule.swift */; };
-		46D8994A2A8E0E5D001849A0 /* VoiceChangingModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 46D899492A8E0E5D001849A0 /* VoiceChangingModule.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		B2B758910BD0DDE266E96754 /* libPods-sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A2F93D0AE929131C93B324B /* libPods-sample.a */; };
 		E9642F3DD5005AD12E1EAD00 /* libPods-sample-sampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C83EFE727BD81DF022CD9FDB /* libPods-sample-sampleTests.a */; };
@@ -48,8 +46,6 @@
 		46B818EB2A8E8F66009853BF /* LocationData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocationData.m; sourceTree = "<group>"; };
 		46CF2F7C2A8CC77C0031E6AE /* DBManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DBManager.m; sourceTree = "<group>"; };
 		46CF2F802A8CD2F40031E6AE /* DBManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DBManager.h; sourceTree = "<group>"; };
-		46D899472A8E0DE7001849A0 /* VoiceChangingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceChangingModule.swift; sourceTree = "<group>"; };
-		46D899492A8E0E5D001849A0 /* VoiceChangingModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VoiceChangingModule.m; sourceTree = "<group>"; };
 		660ED697A7B1A4CB95F956E6 /* Pods-sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-sample.debug.xcconfig"; path = "Target Support Files/Pods-sample/Pods-sample.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = sample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9A2F93D0AE929131C93B324B /* libPods-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,8 +105,6 @@
 				468A07F52A6925D200387006 /* MyLocationDataManager.m */,
 				46CF2F7C2A8CC77C0031E6AE /* DBManager.m */,
 				46CF2F802A8CD2F40031E6AE /* DBManager.h */,
-				46D899472A8E0DE7001849A0 /* VoiceChangingModule.swift */,
-				46D899492A8E0E5D001849A0 /* VoiceChangingModule.m */,
 				46B818EA2A8E8F66009853BF /* LocationData.h */,
 				46B818EB2A8E8F66009853BF /* LocationData.m */,
 			);
@@ -436,10 +430,8 @@
 				468A07F62A6925D200387006 /* MyLocationDataManager.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				46D899482A8E0DE7001849A0 /* VoiceChangingModule.swift in Sources */,
 				46B818EC2A8E8F66009853BF /* LocationData.m in Sources */,
 				46CF2F7D2A8CC77C0031E6AE /* DBManager.m in Sources */,
-				46D8994A2A8E0E5D001849A0 /* VoiceChangingModule.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

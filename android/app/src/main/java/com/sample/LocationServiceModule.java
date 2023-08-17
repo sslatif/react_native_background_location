@@ -59,7 +59,7 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
                     String accuracy = cursor.getString(5);
                     String speed = cursor.getString(6);
 
-                    itemMap.putString("timeStamps", timeStampToDateTime(Long.parseLong(timeStamps)));
+                    itemMap.putString("timestamp", timeStampToDateTime(Long.parseLong(timeStamps)));
                     itemMap.putString("latitude", latitude);
                     itemMap.putString("longitude", longitude);
                     itemMap.putString("altitude", altitude);

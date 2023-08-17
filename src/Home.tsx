@@ -133,7 +133,7 @@ const HomeScreen = ({ navigation }) => {
       // Check if the native module exists before creating the NativeEventEmitter instance
       if (eventEmitter) {
         eventEmitter.addListener('significantLocationChange', data => {
-          console.log('Location from IOS:', data)
+          //console.log('Location from IOS:', data)
         })
         //eventEmitter.start();
         //NativeModules.RNLocationChange.start()
@@ -150,6 +150,17 @@ const HomeScreen = ({ navigation }) => {
 
   const stopService = () => {
     Platform.OS === 'android' && LocationServiceModule.stopLocationService()
+    // if (Platform.OS === 'ios') {
+    //   // Calling the exposed method
+    //   location
+    //     .getAllDatabaseRecords()
+    //     .then(records => {
+    //       console.log('Database records:', records)
+    //     })
+    //     .catch(error => {
+    //       console.error('Database: Error fetching database records:', error)
+    //     })
+    // }
     //:location.stop()
     //NativeModules.RNLocationChange.stop();
   }
@@ -293,7 +304,7 @@ const HomeScreen = ({ navigation }) => {
         requestPermissions()
         if (eventEmitter) {
           eventEmitter.addListener('significantLocationChange', data => {
-            console.log('Events traced:', data)
+            //console.log('Events traced:', data)
             setCurrentLatitude(parseFloat(data.coords.latitude))
             setCurrentLongitude(parseFloat(data.coords.longitude))
             setAltitude(parseFloat(data.coords.altitude))
@@ -315,7 +326,7 @@ const HomeScreen = ({ navigation }) => {
               ',Time:' +
               data.coords.timestamp
             setNewLoc(addressToShow)
-            console.log('Address to show:IOS', addressToShow)
+            //console.log('Address to show:IOS', addressToShow)
           })
         } else {
           console.error("Native module 'MyNativeModule' not found.")

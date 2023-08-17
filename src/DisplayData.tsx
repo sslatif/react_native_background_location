@@ -8,6 +8,9 @@ import {
   Button,
 } from 'react-native'
 import { fetchItems, deleteAll, deleteOldData } from './SQLiteBridge' // Adjust the path accordingly
+import { NativeModules, NativeEventEmitter } from 'react-native'
+const { LocationServiceModule } = NativeModules
+var location = NativeModules.MyLocationDataManager
 
 const DisplayData = ({ navigation }) => {
   const [locationData, setLocationData] = useState([])
@@ -39,15 +42,31 @@ const DisplayData = ({ navigation }) => {
   const getDataFromDb = () => {
     console.log('Fetching data from DB')
 
-    fetchItems()
-      .then(itemsArray => {
-        console.log('Data fetched Successfully:', itemsArray)
-        console.log('Saved Locations:', itemsArray.length)
-        setLocationData(itemsArray)
-      })
-      .catch(error => {
-        console.error('Error fetching items:', error)
-      })
+    if (Platform.OS === 'android') {
+      fetchItems()
+        .then(itemsArray => {
+          console.log('Data fetched Successfully:', itemsArray)
+          console.log('Saved Locations:', itemsArray.length)
+          setLocationData(itemsArray)
+        })
+        .catch(error => {
+          console.error('Error fetching items:', error)
+        })
+    } else {
+      // Calling the exposed method
+      location
+        .getAllDatabaseRecords()
+        .then(records => {
+          console.log('Database records:', records)
+          console.log('Saved Locations:', records.length)
+          setLocationData(records)
+          // Process the records as needed
+        })
+        .catch(error => {
+          console.error('Error retrieving database records:', error)
+          // Handle the error
+        })
+    }
   }
 
   const deleteSelectedRecords = () => {
@@ -55,7 +74,11 @@ const DisplayData = ({ navigation }) => {
   }
 
   const deleteAllData = () => {
-    deleteAll()
+    if (Platform.OS === 'android') {
+      deleteAll()
+    } else {
+      location.deleteAllRecordsFromTable()
+    }
     getDataFromDb()
   }
 
@@ -70,7 +93,7 @@ const DisplayData = ({ navigation }) => {
         renderItem={({ item }) => (
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <Text style={styles.textViewContainer}>
-              {'Time = ' + item.timeStamps}
+              {'Time = ' + item.timestamp}
             </Text>
             <Text style={styles.textViewContainer}>
               {'Latitude = ' + item.latitude}

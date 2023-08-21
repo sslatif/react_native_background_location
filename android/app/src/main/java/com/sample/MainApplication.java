@@ -28,7 +28,6 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             @SuppressWarnings("UnnecessaryLocalVariable") List<ReactPackage> packages = new PackageList(this).getPackages();
-            // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
             packages.add(new NativeModulesPackage());
             return packages;
@@ -63,7 +62,7 @@ public class MainApplication extends Application implements ReactApplication {
             // If you opted-in for the New Architecture, we load the native entry point for this app.
             DefaultNewArchitectureEntryPoint.load();
         }
-        initializeDatabase();
+        //initializeDatabase(); uncomment this just for testing purpose
         ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
     }
 
@@ -87,12 +86,8 @@ public class MainApplication extends Application implements ReactApplication {
 
     private String timeStampToDateTime(long timestamp) {
         try {
-            // Create a SimpleDateFormat object with the desired format
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
-            // Convert the timestamp to a Date object
             Date date = new Date(timestamp);
-            // Format the Date object to the desired date-time format
             return sdf.format(date);
         } catch (Exception e) {
             e.printStackTrace();

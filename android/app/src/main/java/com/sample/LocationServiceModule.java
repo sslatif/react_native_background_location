@@ -133,7 +133,6 @@ public class LocationServiceModule extends ReactContextBaseJavaModule {
     public void addListener(String eventName) {
         if (listenerCount == 0) {
             Log.d("LocationService", "addListener: " + eventName);
-            // Set up any upstream listeners or background tasks as necessary
         }
 
         listenerCount += 1;

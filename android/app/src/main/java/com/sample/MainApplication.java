@@ -62,12 +62,15 @@ public class MainApplication extends Application implements ReactApplication {
             // If you opted-in for the New Architecture, we load the native entry point for this app.
             DefaultNewArchitectureEntryPoint.load();
         }
+        if (databaseHelper == null)
+            databaseHelper = new DatabaseHelper(this);
         //initializeDatabase(); uncomment this just for testing purpose
         ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
     }
 
     public void initializeDatabase() {
-        databaseHelper = new DatabaseHelper(this);
+        if (databaseHelper == null)
+            databaseHelper = new DatabaseHelper(this);
         Log.d("Database", "initializeDatabase & get Records");
         Cursor cursor = databaseHelper.getAllItems();
         if (cursor != null) {
